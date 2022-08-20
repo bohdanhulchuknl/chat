@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
@@ -33,12 +33,13 @@ const Register = () => {
 
     if (handleValidation()) {
       const { username, email, password } = inputsValue;
-      const { data } = axios.post(registerRoute, {
+      
+      const { data } = await axios.post(registerRoute, {
         username,
         email,
         password,
       });
-      console.log(data);
+
       if (!data.status) {
         toast.error(data.msg, toastOptions);
       } else {
@@ -77,6 +78,12 @@ const Register = () => {
   const handleChange = (e) => {
     setInputsValue({ ...inputsValue, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("chat-app-user")) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <>

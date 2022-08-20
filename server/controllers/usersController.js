@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 
 module.exports.register = async (req, res, next) => {
   try {
-    console.log(req.body);
     const { username, email, password } = req.body;
 
     //  check username
@@ -30,3 +29,26 @@ module.exports.register = async (req, res, next) => {
     next(err)
   }
 };
+
+module.exports.login = async (req, res, next) => {
+  try {
+
+    const { username,  password } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.json({ msg: "Incorrect username or password", status: false });
+    }
+
+    const isPassworsValid = await bcrypt.compare(password, user.password)
+    if (!isPassworsValid) {
+      return res.json({ msg: "Incorrect username or password", status: false });
+    }
+
+    delete user.password;
+    return res.json({ status: true, user });
+  } catch (err) {
+    next(err)
+  }
+};
+
