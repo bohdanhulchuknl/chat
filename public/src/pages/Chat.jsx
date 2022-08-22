@@ -1,12 +1,49 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import styled from "styled-components";
+import { allUsersRoute } from "../utils/API";
+import { Contacts } from "../components";
 
 const Chat = () => {
+  const navigate = useNavigate();
+
+  const [contacts, setContacts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(undefined);
+
+  const checkCurrentUser = async () => {
+    if (!localStorage.getItem("chat-app-user")) {
+      navigate("/login");
+    } else {
+      setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+    }
+  };
+
+  const checkContacts = async () => {
+    if (currentUser) {
+      if (currentUser.isAvatarImageSet) {
+        const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+        setContacts(data);
+      } else {
+        navigate("/setAvatar");
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    checkContacts();
+  }, []);
   return (
     <>
       <Container>
-        <div className="container"></div>
+        <div className="container">
+          <Contacts contacts={contacts} currentUser={currentUser}/>
+        </div>
       </Container>
     </>
   );
@@ -27,6 +64,9 @@ const Container = styled.div`
     background-color: #00000076;
     display: grid;
     grid-template-columns: 25% 75%;
+    @media screen and (min-width: 720px) and (max-width: 1080px) {
+      grid-template-columns: 35% 65%;
+    }
   }
 `;
 
